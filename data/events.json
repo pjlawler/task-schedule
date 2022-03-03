@@ -1,0 +1,23 @@
+{ "events": [ {
+    "dtg":"3/9/2022 0800",
+    "description":"Open Clinic",
+    "assigned":"Diane Lord",
+    "onsite": false,
+    "recurring":false
+},
+{
+    "dtg":"3/9/2022 0800",
+    "description":"Hoya",
+    "assigned":"Pat Lawler",
+    "onsite": true,
+    "recurring":false
+},
+{
+    "dtg":"3/7/2022 0800",
+    "description":"Hoya",
+    "assigned":"Pat Lawler",
+    "onsite": true,
+    "recurring":false
+}
+
+]}
