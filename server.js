@@ -1,14 +1,33 @@
 const express = require('express');
 const { events } = require('./data/events');
-const app = express();
-const PORT = process.env.PORT || 3001
+const fs = require('fs');
+const path = require('path');
 
+const app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+const PORT = process.env.PORT || 3001
 
 app.get('/api/events', (req, res) => {
     let results = events;
     if(req.query) { results = filterByQuery(req.query, results)};
     res.json(results);
 });
+app.post('/api/events', (req, res) => {
+    req.body.created = Date.now();
+    const event = createNewEvent(req.body, events);
+    res.json(req.body);
+});
+function createNewEvent(body, eventsArray) {
+    const event = body;
+    eventsArray.push(event);
+    fs.writeFileSync(
+        path.join(__dirname, './data/events.json'),
+        JSON.stringify({ events: eventsArray }, null, 2)
+    );
+    return event;
+}
 
 function filterByQuery(query, eventsArray) {
     let filteredResults = eventsArray;
@@ -21,7 +40,6 @@ function filterByQuery(query, eventsArray) {
     }
     return filteredResults;
 }
-
 function formattedDate(date, type) {
     
     let options;
@@ -39,8 +57,6 @@ function formattedDate(date, type) {
 
     return date.toLocaleDateString('en-US', options);
 }
-
-
 
 
 app.listen(PORT, () => {
