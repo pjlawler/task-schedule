@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <title>Schedule</title>
+</head>
+
+<body>
+    <header><h1>Scheduler</h1>
+
+    </header>
+    <div class="container"> 
+
+    </div>
+
+    <!-- Start of edit/add modal -->
+    <div class="input-form">
+        <form>
+            <label for="event-dtg">Schedule for:</label><br>
+            <input type="datetime-local" name="event-dtg" id="frm_dtg"><br><br>
+            <label for="description">Description</label><br>
+            <input type="text" name="description" id="frm_description"><br><br>
+            <label for="assigned">Assigned to:</label><br>
+            <select name="assigned" id="frm_assigned">
+                <option value="null">- Optional -</option>
+                <option value="wkulzer">Wendy Kulzer</option>
+                <option value="cbebus">Charlie Bebus</option>
+                <option value="etvedt">Elizabeth Tvedt</option>
+                <option value="plawler">Pat Lawler</option>
+                <option value="dlord">Diane Lord</option>
+            </select>
+
+        </form>
+    </div>
+
+    <script src="./assets/js/script.js"></script>
+</body>
+</html>

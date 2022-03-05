@@ -1,34 +1,71 @@
 const express = require('express');
+const { v4: uuidv4 } = require('uuid');
+
 const { events } = require('./data/events');
+
 const fs = require('fs');
 const path = require('path');
 
+
 const app = express();
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001
+
+app.post('/api/events', (req, res) => {
+    console.log(req.query, req.body);
+    switch(req.query.action) {
+        case 'add':
+            createNewEvent(req.body);
+            break;
+        case 'delete':
+            deleteEvent(req.body);
+            break;
+    };
+
+    res.json(req.body);
+});
 
 app.get('/api/events', (req, res) => {
     let results = events;
     if(req.query) { results = filterByQuery(req.query, results)};
     res.json(results);
 });
-app.post('/api/events', (req, res) => {
-    req.body.created = Date.now();
-    const event = createNewEvent(req.body, events);
-    res.json(req.body);
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
 });
-function createNewEvent(body, eventsArray) {
+function createNewEvent(body) {
+    
+    let results = events;
+    
     const event = body;
-    eventsArray.push(event);
+    event.UUID = uuidv4();
+    
+    results.push(event);
+    
     fs.writeFileSync(
         path.join(__dirname, './data/events.json'),
-        JSON.stringify({ events: eventsArray }, null, 2)
+        JSON.stringify({ events: results }, null, 2)
     );
-    return event;
 }
+function deleteEvent(body) {
+    
+    let results = events;
+    
+    const event = body;
+ 
+    results = results.filter(item => {
+        return item.UUID !== body.UUID;
+    });
 
+    fs.writeFileSync(
+        path.join(__dirname, './data/events.json'),
+        JSON.stringify({ events: results }, null, 2)
+    );
+}
 function filterByQuery(query, eventsArray) {
     let filteredResults = eventsArray;
     if(query.date) {
@@ -58,7 +95,7 @@ function formattedDate(date, type) {
     return date.toLocaleDateString('en-US', options);
 }
 
-
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}`)
 })
+

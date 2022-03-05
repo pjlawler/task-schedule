@@ -1,39 +1,40 @@
 {
   "events": [
     {
-      "dtg": "3/9/2022 0800",
+      "dtg": "3/9/2022 08:00",
       "description": "Open Clinic",
       "assigned": "Diane Lord",
-      "onsite": false,
-      "recurring": false
+      "onsite": true,
+      "UUID": "A"
     },
     {
-      "dtg": "3/9/2022 0800",
+      "dtg": "3/9/2022 08:00",
       "description": "Hoya",
       "assigned": "Pat Lawler",
       "onsite": true,
-      "recurring": false
+      "UUID": "B"
     },
     {
-      "dtg": "3/7/2022 0800",
+      "dtg": "3/7/2022 09:00",
       "description": "Hoya",
       "assigned": "Pat Lawler",
       "onsite": true,
-      "recurring": false
+      "recurring": true,
+      "UUID": "C"
     },
     {
-      "dtg": "3/10/2022",
+      "dtg": "3/10/2022 17:00",
       "description": "On-Call",
       "assigned": "Charlie Bebus",
       "recurring": false,
-      "created": 1646354559176
+      "UUID": "D"
     },
     {
-      "dtg": "3/10/2022",
+      "dtg": "3/11/2022 17:00",
       "description": "On-Call",
-      "assigned": "Charlie Bebus",
+      "assigned": "Wendy Kulzer",
       "recurring": false,
-      "created": 1646354601007
+      "UUID": "E"
     }
   ]
 }
