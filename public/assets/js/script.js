@@ -2,7 +2,6 @@
 const containerEl = document.querySelector('.container');
 
 const displayDays = (totalDays) => {
-
     const eraseDays = () => {
         while (containerEl.firstChild) {
             containerEl.removeChild(containerEl.firstChild);
@@ -133,11 +132,6 @@ function formattedDate(date, type) {
     return date.toLocaleDateString('en-US', options);
 };
 
-// containerEl.addEventListener ('click', elementClickedHandler);
-
-
-setInterval(displayDays(28), 1000);
-
 // Gets the name of the icon
 $(".container").on("click", "i", function() {
     const iconTapped = $(this).text().trim();
@@ -195,3 +189,9 @@ $(".container").on("click", "i", function() {
             break;
     }
 });
+
+displayDays(28);
+
+setInterval(() => {
+    displayDays(28);
+}, 1000)
