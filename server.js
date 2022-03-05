@@ -1,7 +1,7 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 
-const { events } = require('./data/events');
+let { events } = require('./data/events');
 
 const fs = require('fs');
 const path = require('path');
@@ -52,18 +52,16 @@ function createNewEvent(body) {
     );
 }
 function deleteEvent(body) {
-    
-    let results = events;
-    
+
     const event = body;
  
-    results = results.filter(item => {
+    events = events.filter(item => {
         return item.UUID !== body.UUID;
     });
 
     fs.writeFileSync(
         path.join(__dirname, './data/events.json'),
-        JSON.stringify({ events: results }, null, 2)
+        JSON.stringify({ events: events }, null, 2)
     );
 }
 function filterByQuery(query, eventsArray) {

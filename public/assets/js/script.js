@@ -132,26 +132,53 @@ function formattedDate(date, type) {
     }
     return date.toLocaleDateString('en-US', options);
 };
-function elementClickedHandler(event) {
-    const addEvent = event.target.getAttribute('day_date');
-    const editEvent = event.target.getAttribute('edit-id');
-    const deleteEvent = event.target.getAttribute('delete-id');
 
-    if(addEvent) { console.log('Add event for: ', addEvent) 
-        const eventTime = '13:00'
-        const description = 'Testing the system'
-        const newEvent = {
-            dtg: `${addEvent} ${eventTime}`,
-            description: `${description}`,
-        }
+// containerEl.addEventListener ('click', elementClickedHandler);
 
-        fetch('/api/events?action=add', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newEvent),
-          })
+
+setInterval(displayDays(28), 1000);
+
+// Gets the name of the icon
+$(".container").on("click", "i", function() {
+    const iconTapped = $(this).text().trim();
+    switch(iconTapped){
+        case 'add':
+            const addEvent = $(this).attr('day_date');
+            const eventTime = '13:00';
+            const description = 'Testing the system';
+            
+            const newEvent = {
+                dtg: `${addEvent} ${eventTime}`,
+                description: `${description}`,
+            }
+    
+            fetch('/api/events?action=add', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newEvent),
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  console.log('Successful POST request:', data);
+                  displayDays(28);
+                  return data;
+                })
+                .catch((error) => {
+                  console.error('Error in POST request:', error);
+                });
+                break;
+        case 'delete':
+            const deleteEvent = $(this).attr('delete-id');
+
+            fetch('/api/events?action=delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ UUID:`${deleteEvent}`}),
+            })
             .then((res) => res.json())
             .then((data) => {
               console.log('Successful POST request:', data);
@@ -162,34 +189,9 @@ function elementClickedHandler(event) {
               console.error('Error in POST request:', error);
             });
 
-
+            break;
+        case 'edit':
+            const editEvent = $(this).attr('edit-id');
+            break;
     }
-    if(deleteEvent) { console.log('Delete event id: ', deleteEvent) 
-
-        fetch('/api/events?action=delete', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ UUID:`${deleteEvent}`}),
-        })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log('Successful POST request:', data);
-          displayDays(28);
-          return data;
-        })
-        .catch((error) => {
-          console.error('Error in POST request:', error);
-        });
-
-
-}
-    if(editEvent) { console.log('Edit event id: ', editEvent) }
-
-};
-
-containerEl.addEventListener ('click', elementClickedHandler);
-
-
-setInterval(displayDays(28), 1000);
+});
