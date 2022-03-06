@@ -278,6 +278,6 @@ $('.container').on('click','p', function(){
 
 displayDays(28);
 
-// setInterval(() => {
-//     displayDays(28);
-// }, 1000)
+setInterval(() => {
+    displayDays(28);
+}, 1000)
