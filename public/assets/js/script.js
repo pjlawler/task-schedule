@@ -1,5 +1,7 @@
 
 const containerEl = document.querySelector('.container');
+let isEditing = false;
+let timeDataInvalid = false;
 
 const displayDays = (totalDays) => {
     const eraseDays = () => {
@@ -81,9 +83,9 @@ const createDayEl = (day_date, data) => {
         trashIcon.setAttribute("delete-id", item.UUID);
 
         // Sets the data to be displayed in event line
-        timeEl.innerText = formattedTime(new Date(item.dtg), 1);
-        descriptionEl.innerText = item.description || '';
-        assignedEl.innerText = item.assigned || '';
+        timeEl.innerHTML = '<p>' + formattedTime(new Date(item.dtg), 1) || '--:--' + '</p>';
+        descriptionEl.innerHTML = '<p>' + item.description || '-- Event Description --'  + '</p>';
+        assignedEl.innerHTML = '<p>' + (item.assigned || '-- Unassigned --')  + '</p>';
         edit_buttonEl.appendChild(pencilIcon);
         delete_buttonEl.appendChild(trashIcon);       
 
@@ -131,67 +133,151 @@ function formattedDate(date, type) {
     }
     return date.toLocaleDateString('en-US', options);
 };
+function addNewEvent(eventDate) {
+    const newEvent = {
+        dtg: `${eventDate}`
+    };
 
-// Gets the name of the icon
-$(".container").on("click", "i", function() {
+    fetch('/api/events?action=add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newEvent),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log('Successful POST request:', data);
+          displayDays(28);
+          return data;
+        })
+        .catch((error) => {
+          console.error('Error in POST request:', error);
+        });
+};
+function deleteEvent(id) {
+    const deleteEvent = {
+        UUID: `${id}`
+    };
+    fetch('/api/events?action=delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ UUID:`${id}`}),
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log('Successful POST request:', data);
+      displayDays(28);
+      return data;
+    })
+    .catch((error) => {
+      console.error('Error in POST request:', error);
+    });
+}
+function updateEvent(event) {
+
+    fetch(`/api/events?action=update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(event),
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Successful POST request:', data);
+        displayDays(28);
+        return data;
+      })
+      .catch((error) => {
+        console.error('Error in POST request:', error);
+      });
+}
+function validateTime(time) {
+    if(typeof time === 'Number') {
+        if (time >= 0 && time <= 2400) {
+            // convert to 
+        }
+    }
+
+
+}
+
+// Event listen for clicking on an icon
+$('.container').on('click', 'i', function() {
     const iconTapped = $(this).text().trim();
     switch(iconTapped){
         case 'add':
-            const addEvent = $(this).attr('day_date');
-            const eventTime = '13:00';
-            const description = 'Testing the system';
-            
-            const newEvent = {
-                dtg: `${addEvent} ${eventTime}`,
-                description: `${description}`,
-            }
-    
-            fetch('/api/events?action=add', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newEvent),
-              })
-                .then((res) => res.json())
-                .then((data) => {
-                  console.log('Successful POST request:', data);
-                  displayDays(28);
-                  return data;
-                })
-                .catch((error) => {
-                  console.error('Error in POST request:', error);
-                });
-                break;
-        case 'delete':
-            const deleteEvent = $(this).attr('delete-id');
-
-            fetch('/api/events?action=delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ UUID:`${deleteEvent}`}),
-            })
-            .then((res) => res.json())
-            .then((data) => {
-              console.log('Successful POST request:', data);
-              displayDays(28);
-              return data;
-            })
-            .catch((error) => {
-              console.error('Error in POST request:', error);
-            });
-
+            const eventDate = $(this).attr('day_date')
+            addNewEvent(eventDate);
             break;
-        case 'edit':
-            const editEvent = $(this).attr('edit-id');
+        case 'delete':
+            const id = $(this).attr('delete-id');
+            deleteEvent(id);
             break;
     }
 });
+// User clicked on an editable text area
+$('.container').on('click','p', function(){
+    if (timeDataInvalid) { 
+        timeDataInvalid = false 
+        return;
+    }
+    // Gets the current text in the element
+    let text = $(this).text().trim();
+    let container_class = $(this).closest('div').attr('class');
+
+    // Gets the UUID of the current element
+    const id = $(this).closest('.event').find('.delete_button').find('i').attr('delete-id');
+    
+    // replaces p element with, and transfers text to, a text input field
+
+    let textInput = $("<textarea>").addClass("form-control").val(text); 
+    
+    $(this).replaceWith(textInput).css({width: '90%'});
+    isEditing = true;
+
+    // auto focus text input field
+    // textInput.trigger("focus");
+
+    textInput.blur(e => {
+
+        // replaces textArea with the p element and inserts the new updated data
+        const container = textInput.closest('div').attr('class');
+        text = textInput.val();
+        $(this).replaceWith = $('p').addClass(container).val(text);
+        // isEditing = false;
+
+         // Gets the current event 
+        const event = fetch(`/api/events/${id}`) 
+        .then((res) => res.json())
+        .then((data) => {
+            console.log('Successful get request:', data);
+            switch(container) {
+                case 'time':
+                    data.dtg = data.dtg.split(" ")[0] + " " + text;
+                    break;
+                case 'description':
+                    data.description = text;
+                    break;
+                case 'assigned':
+                    data.assigned = text;
+                    break;
+            }
+            updateEvent(data);
+            return data;
+        })
+        .catch((error) => {
+            console.error('Error in request:', error);
+        });
+    });
+});
+
 
 displayDays(28);
 
-setInterval(() => {
-    displayDays(28);
-}, 1000)
+// setInterval(() => {
+//     displayDays(28);
+// }, 1000)

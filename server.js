@@ -6,7 +6,6 @@ let { events } = require('./data/events');
 const fs = require('fs');
 const path = require('path');
 
-
 const app = express();
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
@@ -14,56 +13,14 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001
 
-app.post('/api/events', (req, res) => {
-    console.log(req.query, req.body);
-    switch(req.query.action) {
-        case 'add':
-            createNewEvent(req.body);
-            break;
-        case 'delete':
-            deleteEvent(req.body);
-            break;
-    };
 
-    res.json(req.body);
-});
-
+// Returns all events or by query
 app.get('/api/events', (req, res) => {
     let results = events;
     if(req.query) { results = filterByQuery(req.query, results)};
     res.json(results);
 });
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/index.html'));
-});
-function createNewEvent(body) {
-    
-    let results = events;
-    
-    const event = body;
-    event.UUID = uuidv4();
-    
-    results.push(event);
-    
-    fs.writeFileSync(
-        path.join(__dirname, './data/events.json'),
-        JSON.stringify({ events: results }, null, 2)
-    );
-}
-function deleteEvent(body) {
-
-    const event = body;
- 
-    events = events.filter(item => {
-        return item.UUID !== body.UUID;
-    });
-
-    fs.writeFileSync(
-        path.join(__dirname, './data/events.json'),
-        JSON.stringify({ events: events }, null, 2)
-    );
-}
 function filterByQuery(query, eventsArray) {
     let filteredResults = eventsArray;
     if(query.date) {
@@ -75,6 +32,98 @@ function filterByQuery(query, eventsArray) {
     }
     return filteredResults;
 }
+
+// Retruns an event by UUID
+app.get('/api/events/:id', (req, res) => {
+    const result = findById(req.params.id);
+    if (result) {
+      res.json(result);
+    } else {
+      res.send(404);
+    }
+  });
+
+  function findById(id) {
+    const result = events.filter(event => event.UUID === id)[0];
+    return result;
+  }
+
+// Update json data (adds, deletes and updates events)
+app.post('/api/events', (req, res) => {
+    
+    const action = req.query.action;
+    switch(action) {
+        case 'add':
+            createNewEvent(req.body);
+            break;
+        case 'delete':
+            deleteEvent(req.body);
+            break;
+        case 'update':
+            updateEvent(req.body);
+    };
+
+    res.json(req.body);
+});
+
+
+
+
+
+function createNewEvent(body) {
+    
+    let results = events;
+    
+    const event = body;
+    event.dtg = body.dtg + " 00:00";
+    event.description = " -- Event --"
+    event.assigned = " -- Unassigned -- "
+    event.UUID = uuidv4();
+
+    results.push(event);
+    
+    fs.writeFileSync(
+        path.join(__dirname, './data/events.json'),
+        JSON.stringify({ events: results }, null, 2)
+    );
+}
+function deleteEvent(body) {
+
+ 
+    events = events.filter(item => {
+        return item.UUID !== body.UUID;
+    });
+    
+    fs.writeFileSync(
+        path.join(__dirname, './data/events.json'),
+        JSON.stringify({ events: events }, null, 2)
+    );
+}
+
+function updateEvent(body) {
+    
+    events = events.filter(item => {
+        return item.UUID !== body.UUID;
+    });
+
+    events.push(body);
+
+    fs.writeFileSync(
+        path.join(__dirname, './data/events.json'),
+        JSON.stringify({ events: events }, null, 2)
+    );
+};
+
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+
+
+
+
+
 function formattedDate(date, type) {
     
     let options;
